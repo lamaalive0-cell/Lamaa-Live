@@ -1,5 +1,5 @@
 name: lamaa_live
-description: "Lamaa Live - Voice Rooms, Games & Social Entertainment"
+description: "Lamaa Live App"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -11,17 +11,10 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  google_fonts: ^6.1.0
-  font_awesome_flutter: ^10.7.0
-  cached_network_image: ^3.3.1
-  flutter_svg: ^2.0.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
