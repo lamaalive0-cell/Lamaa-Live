@@ -1,40 +1,28 @@
 name: Build Lamaa Live APK
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-
-      - name: Create Android + Internet Permission + Build
+          channel: stable
+      - name: Build
         run: |
           flutter config --no-analytics
           flutter create . --platforms android --org com.lamaa.live
-          # إضافة إذن الإنترنت (مهم جداً)
           sed -i '/<manifest/a\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
-          # السماح بالاتصال بالشبكة
-          sed -i 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
           flutter pub get
           flutter build apk --release --no-tree-shake-icons
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: LamaaLive-Release-APK
           path: build/app/outputs/flutter-apk/app-release.apk

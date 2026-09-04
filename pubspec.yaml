@@ -1,5 +1,5 @@
 name: lamaa_live
-description: "Lamaa Live App"
+description: Lamaa Live
 publish_to: 'none'
 version: 1.0.0+1
 environment:
