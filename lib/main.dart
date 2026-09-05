@@ -7,8 +7,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://fpwosplqsbnirjoleqaw.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwd29zcGxxc2JuaXJqb2xlcWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0OTgyMDksImV4cCI6MjEwNDA3NDIwOX0.jnqNZIauBqUmQ-tyvdx3lKdhmLHTHj9wITd_01puIKw',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwd29zcGxxc2JuaXJqb2xlcWF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0OTgyMDksImV4cCI6MjEwNDA3NDIwOX0.jnqNZIauBqUmQ-tyvdx3lKdhmLHTHj9wITd_01puIKw',
   );
   runApp(const LamaaLiveApp());
 }
@@ -17,9 +16,11 @@ final supabase = Supabase.instance.client;
 
 class LamaaLiveApp extends StatelessWidget {
   const LamaaLiveApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'لمعة لايف',
       debugShowCheckedModeBanner: false,
       locale: const Locale('ar', 'SA'),
       supportedLocales: const [Locale('ar', 'SA')],
@@ -49,6 +50,7 @@ class LamaaLiveApp extends StatelessWidget {
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<AuthState>(
@@ -65,6 +67,7 @@ class AuthGate extends StatelessWidget {
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
+
   @override
   State<AuthPage> createState() => _AuthPageState();
 }
@@ -105,32 +108,30 @@ class _AuthPageState extends State<AuthPage> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Text('✨ لمعة لايف ✨',
-              style: TextStyle(fontSize: 28, color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
-          const SizedBox(height: 24),
-          if (signUp)
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'اسم المستخدم')),
-          TextField(controller: email, decoration: const InputDecoration(labelText: 'الإيميل')),
-          TextField(controller: pass, obscureText: true, decoration: const InputDecoration(labelText: 'كلمة السر')),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700),
-              foregroundColor: Colors.black,
-              minimumSize: const Size(double.infinity, 48),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('✨ لمعة لايف ✨', style: TextStyle(fontSize: 28, color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            if (signUp) TextField(controller: name, decoration: const InputDecoration(labelText: 'اسم المستخدم')),
+            TextField(controller: email, decoration: const InputDecoration(labelText: 'الإيميل')),
+            TextField(controller: pass, obscureText: true, decoration: const InputDecoration(labelText: 'كلمة السر')),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFD700),
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              onPressed: loading ? null : submit,
+              child: loading ? const CircularProgressIndicator(color: Colors.black) : Text(signUp ? 'إنشاء حساب' : 'دخول'),
             ),
-            onPressed: loading ? null : submit,
-            child: loading
-                ? const CircularProgressIndicator()
-                : Text(signUp ? 'إنشاء حساب' : 'دخول'),
-          ),
-          TextButton(
-            onPressed: () => setState(() => signUp = !signUp),
-            child: Text(signUp ? 'لديك حساب؟ دخول' : 'حساب جديد',
-                style: const TextStyle(color: Color(0xFFFFD700))),
-          ),
-        ]),
+            TextButton(
+              onPressed: () => setState(() => signUp = !signUp),
+              child: Text(signUp ? 'لديك حساب؟ دخول' : 'حساب جديد', style: const TextStyle(color: Color(0xFFFFD700))),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -138,15 +139,17 @@ class _AuthPageState extends State<AuthPage> {
 
 class MainTabs extends StatefulWidget {
   const MainTabs({super.key});
+
   @override
   State<MainTabs> createState() => _MainTabsState();
 }
 
 class _MainTabsState extends State<MainTabs> {
   int i = 0;
+  final pages = const [HomePage(), GamesPage(), MomentsPage(), InboxPage(), ProfilePage()];
+
   @override
   Widget build(BuildContext context) {
-    final pages = const [HomePage(), GamesPage(), MomentsPage(), InboxPage(), ProfilePage()];
     return Scaffold(
       body: pages[i],
       bottomNavigationBar: BottomNavigationBar(
@@ -159,7 +162,7 @@ class _MainTabsState extends State<MainTabs> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
           BottomNavigationBarItem(icon: Icon(Icons.sports_esports), label: 'الألعاب'),
-          BottomNavigationBarItem(icon: Icon(Icons.feed), label: 'يومياتي'),
+          BottomNavigationBarItem(icon: Icon(Icons.auto_awesome_motion), label: 'يومياتي'),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الرسائل'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'حسابي'),
         ],
@@ -168,9 +171,10 @@ class _MainTabsState extends State<MainTabs> {
   }
 }
 
-// ================= الرئيسية + الغرف =================
+// ================= 1. الرئيسية والغرف الصوتية =================
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -203,8 +207,8 @@ class _HomePageState extends State<HomePage> {
           bottom: MediaQuery.of(ctx).viewInsets.bottom + 16,
         ),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('إنشاء غرفة 🎙️', style: TextStyle(color: Color(0xFFFFD700), fontSize: 18)),
-          TextField(controller: titleC, decoration: const InputDecoration(labelText: 'اسم الغرفة')),
+          const Text('إنشاء غرفة جديدة 🎙️', style: TextStyle(color: Color(0xFFFFD700), fontSize: 18, fontWeight: FontWeight.bold)),
+          TextField(controller: titleC, decoration: const InputDecoration(labelText: 'عنوان الغرفة')),
           const SizedBox(height: 12),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black),
@@ -220,13 +224,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('✨ لمعة لايف'),
+        title: const Text('✨ لمعة لايف ✨'),
         actions: [
           IconButton(onPressed: openCreate, icon: const Icon(Icons.add_circle, color: Color(0xFFFFD700))),
         ],
       ),
-      body: FutureBuilder(
-        future: supabase.from('rooms').select().order('created_at', ascending: false),
+      body: StreamBuilder(
+        stream: supabase.from('rooms').stream(primaryKey: ['id']).order('created_at', ascending: false),
         builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFFFFD700)));
@@ -234,22 +238,19 @@ class _HomePageState extends State<HomePage> {
           final rooms = (snap.data as List?) ?? [];
           if (rooms.isEmpty) {
             return const Center(
-              child: Text('لا غرف بعد\nاضغط + لإنشاء غرفة', textAlign: TextAlign.center),
+              child: Text('لا توجد غرف مفتوحة حالياً.\nاضغط + في الأعلى لإنشاء غرفتك!', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
             );
           }
           return GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10,
+              crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.9,
             ),
             itemCount: rooms.length,
             itemBuilder: (context, i) {
               final r = rooms[i] as Map;
               return InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => RoomPage(room: r)),
-                ),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RoomPage(room: r))),
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A1A22),
@@ -259,8 +260,9 @@ class _HomePageState extends State<HomePage> {
                   child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                     const Icon(Icons.mic, color: Color(0xFFFFD700), size: 36),
                     const SizedBox(height: 8),
-                    Text('${r['title'] ?? 'غرفة'}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    const Text('اضغط للدخول', style: TextStyle(fontSize: 11, color: Colors.greenAccent)),
+                    Text('${r['title'] ?? 'غرفة لمعة'}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    const Text('🔴 بث حي - اضغط للدخول', style: TextStyle(fontSize: 10, color: Colors.greenAccent)),
                   ]),
                 ),
               );
@@ -276,6 +278,7 @@ class _HomePageState extends State<HomePage> {
 class RoomPage extends StatefulWidget {
   final Map room;
   const RoomPage({super.key, required this.room});
+
   @override
   State<RoomPage> createState() => _RoomPageState();
 }
@@ -293,9 +296,11 @@ class _RoomPageState extends State<RoomPage> {
 
   Future<void> loadAll() async {
     final rid = widget.room['id'];
-    final s = await supabase.from('room_participants').select().eq('room_id', rid);
-    final m = await supabase.from('room_messages').select().eq('room_id', rid).order('created_at');
-    if (mounted) setState(() { seats = s; messages = m; });
+    try {
+      final s = await supabase.from('room_participants').select().eq('room_id', rid);
+      final m = await supabase.from('room_messages').select().eq('room_id', rid).order('created_at');
+      if (mounted) setState(() { seats = s; messages = m; });
+    } catch (_) {}
   }
 
   Future<void> sit(int index) async {
@@ -338,8 +343,9 @@ class _RoomPageState extends State<RoomPage> {
     final gifts = [
       ['🌹 وردة', 10],
       ['💖 قلب', 50],
-      ['🏎️ سيارة', 1000],
+      ['🏎️ فراري', 1000],
       ['🏰 قصر', 5000],
+      ['👑 تاج الملك', 10000],
     ];
     showModalBottomSheet(
       context: context,
@@ -371,7 +377,7 @@ class _RoomPageState extends State<RoomPage> {
     final gold = (me['gold_balance'] ?? 0) as int;
     if (gold < price) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الذهب غير كافٍ')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الذهب غير كافٍ! قم بالشحن')));
       }
       return;
     }
@@ -382,7 +388,7 @@ class _RoomPageState extends State<RoomPage> {
     await supabase.from('room_messages').insert({
       'room_id': widget.room['id'],
       'user_id': u.id,
-      'sender_name': '🎁 هدية',
+      'sender_name': '🎁 إعلان هدية',
       'message': '${me['username']} أرسل $gift بقيمة $price 🪙',
       'is_gift_banner': true,
     });
@@ -393,7 +399,7 @@ class _RoomPageState extends State<RoomPage> {
   Widget build(BuildContext context) {
     final u = supabase.auth.currentUser;
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.room['title'] ?? 'غرفة'}')),
+      appBar: AppBar(title: Text('${widget.room['title'] ?? 'الغرفة الصوتية'}')),
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.all(12),
@@ -424,46 +430,55 @@ class _RoomPageState extends State<RoomPage> {
             itemCount: messages.length,
             itemBuilder: (context, i) {
               final m = messages[i];
+              final isBanner = m['is_gift_banner'] == true;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text('${m['sender_name']}: ${m['message']}',
-                    style: TextStyle(color: (m['is_gift_banner'] == true) ? const Color(0xFFFFD700) : Colors.white)),
+                    style: TextStyle(color: isBanner ? const Color(0xFFFFD700) : Colors.white, fontWeight: isBanner ? FontWeight.bold : FontWeight.normal)),
               );
             },
           ),
         ),
-        Row(children: [
-          Expanded(child: TextField(controller: msgC, decoration: const InputDecoration(hintText: 'رسالة...', contentPadding: EdgeInsets.all(12)))),
-          IconButton(onPressed: sendMsg, icon: const Icon(Icons.send, color: Color(0xFFFFD700))),
-          IconButton(onPressed: loadAll, icon: const Icon(Icons.refresh, color: Colors.white70)),
-        ]),
+        Container(
+          padding: const EdgeInsets.all(8),
+          color: const Color(0xFF1A1A22),
+          child: Row(children: [
+            Expanded(child: TextField(controller: msgC, decoration: const InputDecoration(hintText: 'اكتب رسالة...', border: InputBorder.none))),
+            IconButton(onPressed: sendMsg, icon: const Icon(Icons.send, color: Color(0xFFFFD700))),
+            IconButton(onPressed: loadAll, icon: const Icon(Icons.refresh, color: Colors.white70)),
+          ]),
+        ),
       ]),
     );
   }
 }
 
-// ================= الألعاب =================
+// ================= 2. الألعاب =================
 class GamesPage extends StatelessWidget {
   const GamesPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('🎮 الألعاب')),
+      appBar: AppBar(title: const Text('🎮 الألعاب التفاعلية')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          gameBtn(context, '🐱 Greedy Cat', const GreedyPage()),
-          gameBtn(context, '🎡 عجلة الحظ', const WheelPage()),
+          _gameCard(context, '🐱 Greedy Cat (الخضار واللحوم)', 'مضاعفات حتى x45', const GreedyPage()),
+          const SizedBox(height: 12),
+          _gameCard(context, '🎡 عجلة الحظ', 'مضاعفات حتى x50', const WheelPage()),
         ],
       ),
     );
   }
 
-  Widget gameBtn(BuildContext context, String t, Widget page) {
+  Widget _gameCard(BuildContext context, String title, String sub, Widget page) {
     return Card(
       color: const Color(0xFF1A1A22),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: const Color(0xFFFFD700).withOpacity(0.3))),
       child: ListTile(
-        title: Text(t, style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
+        title: Text(title, style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
+        subtitle: Text(sub, style: const TextStyle(color: Colors.white54, fontSize: 12)),
         trailing: const Icon(Icons.play_arrow, color: Color(0xFFFFD700)),
         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
       ),
@@ -473,6 +488,7 @@ class GamesPage extends StatelessWidget {
 
 class GreedyPage extends StatefulWidget {
   const GreedyPage({super.key});
+
   @override
   State<GreedyPage> createState() => _GreedyPageState();
 }
@@ -490,7 +506,7 @@ class _GreedyPageState extends State<GreedyPage> {
       final p = await supabase.from('profiles').select('gold_balance').eq('id', u.id).single();
       final gold = (p['gold_balance'] ?? 0) as int;
       if (gold < bet) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الذهب لا يكفي')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الذهب غير كافٍ!')));
         return;
       }
       await supabase.from('profiles').update({'gold_balance': gold - bet}).eq('id', u.id);
@@ -500,11 +516,11 @@ class _GreedyPageState extends State<GreedyPage> {
         final prize = bet * mult;
         await supabase.from('profiles').update({'gold_balance': gold - bet + prize}).eq('id', u.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فوز +$prize 🪙'), backgroundColor: Colors.green));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('🎉 فزت بـ $prize ذهب!'), backgroundColor: Colors.green));
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('خسارة'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('😿 لم تفز هذه المرة'), backgroundColor: Colors.redAccent));
         }
       }
     } finally {
@@ -515,32 +531,34 @@ class _GreedyPageState extends State<GreedyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Greedy Cat')),
+      appBar: AppBar(title: const Text('🐱 Greedy Cat')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(children: [
+          const Text('اختر المضاعف والرهان:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
           Wrap(spacing: 8, children: [5, 10, 25, 45].map((m) {
             return ChoiceChip(
               label: Text('x$m'),
               selected: mult == m,
-              onSelected: (_) => setState(() => mult = m),
               selectedColor: const Color(0xFFFFD700),
+              onSelected: (_) => setState(() => mult = m),
             );
           }).toList()),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Wrap(spacing: 8, children: [100, 500, 1000].map((b) {
             return ChoiceChip(
               label: Text('$b🪙'),
               selected: bet == b,
-              onSelected: (_) => setState(() => bet = b),
               selectedColor: const Color(0xFFFFD700),
-            );
+              onSelected: (_) => setState(() => bet =
+);
           }).toList()),
-          const SizedBox(height: 24),
+          const SizedBox(height: 30),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black, minimumSize: const Size(double.infinity, 48)),
             onPressed: playing ? null : play,
-            child: Text(playing ? '...' : 'راهن الآن'),
+            child: Text(playing ? 'جاري اللعب...' : '🎲 ابدأ الرهان'),
           ),
         ]),
       ),
@@ -556,6 +574,7 @@ class WheelPage extends StatefulWidget {
 
 class _WheelPageState extends State<WheelPage> {
   bool spinning = false;
+
   Future<void> spin() async {
     final u = supabase.auth.currentUser;
     if (u == null) return;
@@ -564,230 +583,50 @@ class _WheelPageState extends State<WheelPage> {
       final p = await supabase.from('profiles').select('gold_balance').eq('id', u.id).single();
       final gold = (p['gold_balance'] ?? 0) as int;
       if (gold < 100) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تحتاج 100 ذهب')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تحتاج 100 ذهب للتدوير!')));
         return;
       }
-      await supabase.from('profiles').update({'gold_balance': gold - price}).eq('id', u.id);
-    final recv = await supabase.from('profiles').select('points_balance').eq('id', targetId).maybeSingle();
-    final pts = (recv?['points_balance'] ?? 0) as int;
-    await supabase.from('profiles').update({'points_balance': pts + price}).eq('id', targetId);
-    await supabase.from('room_messages').insert({
-      'room_id': widget.room['id'],
-      'user_id': u.id,
-      'sender_name': '🎁 هدية',
-      'message': '${me['username']} أرسل $gift بقيمة $price 🪙',
-      'is_gift_banner': true,
-    });
-    await loadAll();
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final u = supabase.auth.currentUser;
-    return Scaffold(
-      appBar: AppBar(title: Text('${widget.room['title'] ?? 'غرفة'}')),
-      body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.all(12),child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: 8,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, mainAxisSpacing: 8, crossAxisSpacing: 8),
-            itemBuilder: (context, i) {
-              final list = seats.where((e) => e['seat_index'] == i).toList();
-              final occ = list.isNotEmpty;
-              final me = occ && list.first['user_id'] == u?.id;
-              return InkWell(
-                onTap: () => sit(i),
-                child: CircleAvatar(
-                  backgroundColor: me ? const Color(0xFFFFD700) : const Color(0xFF1A1A22),
-                  child: Text(occ ? (me ? 'أنت' : '🎤') : '${i + 1}',
-                      style: TextStyle(color: me ? Colors.black : Colors.white, fontSize: 12)),
-                ),
-              );
-            },
-          ),
-        ),
-        const Divider(color: Colors.white12),
-        Expanded(child: ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: messages.length,
-            itemBuilder: (context, i) {
-              final m = messages[i];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text('${m['sender_name']}: ${m['message']}',
-                    style: TextStyle(color: (m['is_gift_banner'] == true) ? const Color(0xFFFFD700) : Colors.white)),
-              );
-            },
-          ),
-        ),
-        Row(children: [
-          Expanded(child: TextField(controller: msgC, decoration: const InputDecoration(hintText: 'رسالة...', contentPadding: EdgeInsets.all(12)))),
-          IconButton(onPressed: sendMsg, icon: const Icon(Icons.send, color: Color(0xFFFFD700))),
-          IconButton(onPressed: loadAll, icon: const Icon(Icons.refresh, color: Colors.white70)),
-        ]),
-      ]),
-    );
-  }
-}
-
-// ================= الألعاب =================
-class GamesPage extends StatelessWidget {
-  const GamesPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('🎮 الألعاب')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          gameBtn(context, '🐱 Greedy Cat', const GreedyPage()),
-          gameBtn(context, '🎡 عجلة الحظ', const WheelPage()),
-        ],
-      ),
-    );
-  }
-
-  Widget gameBtn(BuildContext context, String t, Widget page) {
-    return Card(color: const Color(0xFF1A1A22),
-      child: ListTile(
-        title: Text(t, style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
-        trailing: const Icon(Icons.play_arrow, color: Color(0xFFFFD700)),
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
-      ),
-    );
-  }
-}
-
-class GreedyPage extends StatefulWidget {
-  const GreedyPage({super.key});
-  @override
-  State<GreedyPage> createState() => _GreedyPageState();
-}
-
-class _GreedyPageState extends State<GreedyPage> {
-  int bet = 100;
-  int mult = 5;
-  bool playing = false;
-
-  Future<void> play() async {
-    final u = supabase.auth.currentUser;
-    if (u == null) return;
-    setState(() => playing = true);
-    try {
-      final p = await supabase.from('profiles').select('gold_balance').eq('id', u.id).single();
-      final gold = (p['gold_balance'] ?? 0) as int;
-      if (gold < bet) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('الذهب لا يكفي')));
-        return;
-      }
-      await supabase.from('profiles').update({'gold_balance': gold - bet}).eq('id', u.id);
-      await Future.delayed(const Duration(seconds: 1));
-      final win = Random().nextInt(100) < (mult == 5 ? 35 : mult == 10 ? 18 : 5);
-      if (win) {
-        final prize = bet * mult;
-        await supabase.from('profiles').update({'gold_balance': gold - bet + prize}).eq('id', u.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فوز +$prize 🪙'), backgroundColor: Colors.green));
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('خسارة'), backgroundColor: Colors.red));
-        }
-      }
-    } finally {
-      if (mounted) setState(() => playing = false);
-    }
-  }
-
-  @overrideWidget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Greedy Cat')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          Wrap(spacing: 8, children: [5, 10, 25, 45].map((m) {
-            return ChoiceChip(
-              label: Text('x$m'),
-              selected: mult == m,
-              onSelected: (_) => setState(() => mult = m),
-              selectedColor: const Color(0xFFFFD700),
-            );
-          }).toList()),
-          const SizedBox(height: 12),
-          Wrap(spacing: 8, children: [100, 500, 1000].map((b) {
-            return ChoiceChip(
-              label: Text('$b🪙'),
-              selected: bet == b,
-              onSelected: (_) => setState(() => bet = b),
-              selectedColor: const Color(0xFFFFD700),
-            );
-          }).toList()),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black),
-            onPressed: playing ? null : play,
-            child: Text(playing ? '...' : 'راهن الآن'),
-          ),
-        ]),
-      ),
-    );
-  }
-}
-
-class WheelPage extends StatefulWidget {
-  const WheelPage({super.key});
-  @override
-  State<WheelPage> createState() => _WheelPageState();
-}
-
-class _WheelPageState extends State<WheelPage> {
-  bool spinning = false;
-  Future<void> spin() async {
-    final u = supabase.auth.currentUser;
-    if (u == null) return;
-    setState(() => spinning = true);
-    try {
-      final p = await supabase.from('profiles').select('gold_balance').eq('id', u.id).single();
-      final gold = (p['gold_balance'] ?? 0) as int;
-      if (gold < 100) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تحتاج 100 ذهب')));return;
-      }
-      await supabase.from('profiles').update({'gold_balance': gold - 100}).eq('id', u.id);
+supabase.from('profiles').update({'gold_balance': gold - 100}).eq('id', u.id);
       await Future.delayed(const Duration(seconds: 1));
       final m = [0, 2, 5, 10][Random().nextInt(4)];
       if (m > 0) {
         final prize = 100 * m;
         await supabase.from('profiles').update({'gold_balance': gold - 100 + prize}).eq('id', u.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فوز x$m = $prize')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('🎉 فزت بـ $prize ذهب! (x$m)'), backgroundColor: Colors.green));
         }
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لم تفز')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('💔 حظ أوفر'), backgroundColor: Colors.redAccent));
       }
     } finally {
       if (mounted) setState(() => spinning = false);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('عجلة الحظ')),
+      appBar: AppBar(title: const Text('🎡 عجلة الحظ')),
       body: Center(
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black),
-          onPressed: spinning ? null : spin,
-          child: Text(spinning ? 'تدور...' : 'دور بـ 100🪙'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.blur_circular, size: 100, color: Color(0xFFFFD700)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black, padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12)),
+              onPressed: spinning ? null : spin,
+              child: Text(spinning ? 'تدور...' : '🎡 أدِر العجلة بـ 100🪙'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-// ================= المنشورات =================
 class MomentsPage extends StatefulWidget {
   const MomentsPage({super.key});
+
   @override
   State<MomentsPage> createState() => _MomentsPageState();
 }
@@ -811,19 +650,7 @@ class _MomentsPageState extends State<MomentsPage> {
     }
   }
 
-  Future<void> add() async {
-    final u = supabase.auth.currentUser;
-    if (u == null || c.text.trim().isEmpty) return;
-    final p = await supabase.from('profiles').select('username').eq('id', u.id).maybeSingle();
-    await supabase.from('moments').insert({
-      'user_id': u.id,
-      'author_name': p?['username'] ?? 'مستخدم',
-      'content': c.text.trim(),
-    });
-    c.clear();
-    if (mounted) Navigator.pop(context);
-    await load();
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -840,11 +667,12 @@ class _MomentsPageState extends State<MomentsPage> {
                 builder: (_) => Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    TextField(controller: c, decoration: const InputDecoration(hintText: 'اكتب منشورك')),
+                    TextField(controller: c, decoration: const InputDecoration(hintText: 'اكتب منشورك هنا...')),
+                    const SizedBox(height: 12),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFD700), foregroundColor: Colors.black),
                       onPressed: add,
-                      child: const Text('نشر'),
+                      child: const Text('نشر الآن'),
                     ),
                   ]),
                 ),
@@ -853,16 +681,27 @@ class _MomentsPageState extends State<MomentsPage> {
           ),
         ],
       ),
-      body: RefreshIndicator(
+body: RefreshIndicator(
         onRefresh: load,
         child: posts.isEmpty
-            ? ListView(children: const [SizedBox(height: 120), Center(child: Text('لا منشورات - اضغط القلم'))])
+            ? ListView(children: const [SizedBox(height: 100), Center(child: Text('لا توجد منشورات بعد، اضغط القلم لنشر أول منشور!'))])
             : ListView.builder(
+                padding: const EdgeInsets.all(12),
                 itemCount: posts.length,
                 itemBuilder: (context, i) {
-                  final p = posts[i];return ListTile(
-                    title: Text('${p['author_name']}', style: const TextStyle(color: Color(0xFFFFD700))),
-                    subtitle: Text('${p['content']}'),
+                  final p = posts[i];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(color: const Color(0xFF1A1A22), borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${p['author_name']}', style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Text('${p['content']}'),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -871,27 +710,10 @@ class _MomentsPageState extends State<MomentsPage> {
   }
 }
 
-class InboxPage extends StatelessWidget {
-  const InboxPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('💬 الرسائل')),
-      body: const Center(child: Text('المحادثات الخاصة - المرحلة القادمة مباشرة بعد الغرف')),
-    );
-  }
-}
 
-// ================= الحساب =================
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
-  @overrideState<ProfilePage> createState() => _ProfilePageState();
-}
 
-class _ProfilePageState extends State<ProfilePage> {
-  Map? data;
 
-  @override
+@override
   void initState() {
     super.initState();
     load();
@@ -910,56 +732,66 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1A1A22),
         title: Text(t, style: const TextStyle(color: Color(0xFFFFD700))),
-        content: Text(b),actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('حسناً'))],
+        content: Text(b),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('حسناً', style: TextStyle(color: Color(0xFFFFD700))))],
       ),
     );
   }
-
-  @override
+@override
   Widget build(BuildContext context) {
     final u = supabase.auth.currentUser;
     final gold = data?['gold_balance'] ?? 10000;
     final points = data?['points_balance'] ?? 0;
     final level = data?['user_level'] ?? 1;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('حسابي')),
+      appBar: AppBar(title: const Text('حسابي الشخصي')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Center(child: CircleAvatar(radius: 40, backgroundColor: Color(0xFFFFD700), child: Icon(Icons.person, color: Colors.black, size: 40))),
           const SizedBox(height: 8),
-          Center(child: Text('${data?['username'] ?? u?.email?.split('@').first ?? 'مستخدم'}',
-              style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold))),
+          Center(child: Text('${data?['username'] ?? u?.email?.split('@').first ?? 'مستخدم'}', style: const TextStyle(color: Color(0xFFFFD700), fontSize: 20, fontWeight: FontWeight.bold))),
           const SizedBox(height: 16),
           Card(
             color: const Color(0xFF1A1A22),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Text('🪙 $gold'),Text('💎 $points'),
-              ]),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text('🪙 الذهب: $gold', style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.bold)),
+                  Text('💎 النقاط: $points', style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold)),
+                ],
+              ),
             ),
           ),
+const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.star, color: Color(0xFFFFD700)),
-            title: const Text('المستوى'),
-            subtitle: Text('Lv.$level'),
-            onTap: () => info('المستوى', 'مستواك الحالي $level — يزيد بالنشاط والهدايا'),
+            title: const Text('المستوى الحالي'),
+            subtitle: Text('Lv.$level (ملك لمعة)'),
+            onTap: () => info('المستوى الحالي', 'مستواك الحالي $level — يزيد بالنشاط والهدايا!'),
           ),
           ListTile(
             leading: const Icon(Icons.workspace_premium, color: Color(0xFFFFD700)),
-            title: const Text('VIP'),
-            onTap: () => info('VIP', '4 مستويات: 4.99 / 9.99 / 19.99 / 49.99\nمميزات إطار وخصم شحن وهدايا يومية'),
+            title: const Text('عضوية VIP'),
+            subtitle: const Text('عرض المستويات الـ 4'),
+            onTap: () => info('عضوية VIP', 'مستويات VIP:\n• VIP 1: 4.99\$\n• VIP 2: 9.99\$\n• VIP 3: 19.99\$\n• VIP 4 👑: 49.99\$'),
           ),
           ListTile(
             leading: const Icon(Icons.apartment, color: Color(0xFFFFD700)),
-            title: const Text('الوكالة'),
-            onTap: () => info('الوكالة', 'عمولة 10% إلى 20% حسب مستوى الوكالة'),
+            title: const Text('نظام الوكالة'),
+            subtitle: const Text('عرض التفاصيل والعمولات'),
+            onTap: () => info('الوكالة', 'عمولات الوكلاء من 10% إلى 20% حسب عدد الأعضاء والأرباح!'),
           ),
           ListTile(
             leading: const Icon(Icons.card_giftcard, color: Color(0xFFFFD700)),
             title: const Text('صندوق الهدايا'),
-            onTap: () => info('الهدايا', 'نقاطك الحالية: $points\nالذهب: $gold'),),
+            subtitle: const Text('700 هدية تفاعلية'),
+            onTap: () => info('الهدايا', 'رصيد نقاطك الحالي: $points نقطة مجمعة من الهدايا.'),
+          ),
+const Divider(color: Colors.white12),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.redAccent),
             title: const Text('تسجيل الخروج', style: TextStyle(color: Colors.redAccent)),
