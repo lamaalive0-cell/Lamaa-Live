@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       
       // هنا جعلنا التطبيق يفتح مباشرة على "شاشة الغرفة"
-      home: const RoomScreen(roomId: 1), 
+      home: const RoomScreen(roomId: 2), 
     );
   }
 }
