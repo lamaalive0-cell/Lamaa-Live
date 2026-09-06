@@ -2,18 +2,22 @@ name: lamaa_live
 description: Lamaa Live
 publish_to: 'none'
 version: 1.0.0+1
+
 environment:
   sdk: '>=3.0.0 <4.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   supabase_flutter: ^2.3.4
-    agora_rtc_engine: ^6.3.0
-  permission_handler: ^11.3.0
+  agora_rtc_engine: ^6.3.2
+  permission_handler: ^11.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
 flutter:
   uses-material-design: true
