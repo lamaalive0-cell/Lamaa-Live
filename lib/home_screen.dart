@@ -11,28 +11,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentTab = 0;
+  int tab = 0;
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      RoomsTab(userName: widget.userName),
-      const CategoriesTab(),
-      const GamesTab(),
-      const GiftsTab(),
-      ProfileTab(userName: widget.userName),
-    ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
-      body: SafeArea(child: pages[currentTab]),
+      body: SafeArea(
+        child: IndexedStack(
+          index: tab,
+          children: [
+            RoomsPage(userName: widget.userName),
+            const SimplePage(title: 'الأقسام', text: 'الأقسام قريبًا'),
+            const SimplePage(title: 'الألعاب', text: 'الألعاب قريبًا'),
+            const SimplePage(title: 'الهدايا', text: 'الهدايا قريبًا'),
+            SimplePage(title: 'حسابي', text: 'مرحبًا ${widget.userName}'),
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentTab,
-        onTap: (i) => setState(() => currentTab = i),
+        currentIndex: tab,
+        onTap: (i) => setState(() => tab = i),
+        type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF1A1A1A),
         selectedItemColor: Colors.deepPurpleAccent,
         unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.mic), label: 'الغرف'),
           BottomNavigationBarItem(icon: Icon(Icons.category), label: 'الأقسام'),
@@ -45,16 +48,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ========== 1) تبويب الغرف ==========
-class RoomsTab extends StatefulWidget {
-  final String userName;
-  const RoomsTab({super.key, required this.userName});
+class SimplePage extends StatelessWidget {
+  final String title;
+  final String text;
+  const SimplePage({super.key, required this.title, required this.text});
 
   @override
-  State<RoomsTab> createState() => _RoomsTabState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(title),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1A1A1A),
+      ),
+      body: Center(
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
 }
 
-class _RoomsTabState extends State<RoomsTab> {
+class RoomsPage extends StatefulWidget {
+  final String userName;
+  const RoomsPage({super.key, required this.userName});
+
+  @override
+  State<RoomsPage> createState() => _RoomsPageState();
+}
+
+class _RoomsPageState extends State<RoomsPage> {
   final supabase = Supabase.instance.client;
   List<dynamic> rooms = [];
   bool loading = true;
@@ -63,14 +90,15 @@ class _RoomsTabState extends State<RoomsTab> {
   @override
   void initState() {
     super.initState();
-    fetchRooms();
+    loadRooms();
   }
 
-  Future<void> fetchRooms() async {
+  Future<void> loadRooms() async {
     setState(() {
       loading = true;
       errorText = null;
     });
+
     try {
       final data = await supabase
           .from('rooms')
@@ -111,11 +139,12 @@ class _RoomsTabState extends State<RoomsTab> {
           ),
         ),
       );
-      fetchRooms();
+
+      loadRooms();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل الإنشاء: $e')),
+        SnackBar(content: Text('فشل إنشاء الغرفة: $e')),
       );
     }
   }
@@ -125,13 +154,13 @@ class _RoomsTabState extends State<RoomsTab> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('الغرف المباشرة 🎙️'),
+        title: const Text('الغرف المباشرة'),
         centerTitle: true,
         backgroundColor: const Color(0xFF1A1A1A),
         actions: [
           IconButton(
+            onPressed: loadRooms,
             icon: const Icon(Icons.refresh),
-            onPressed: fetchRooms,
           ),
         ],
       ),
@@ -148,16 +177,16 @@ class _RoomsTabState extends State<RoomsTab> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.error, color: Colors.red, size: 60),
-                        const SizedBox(height: 10),
-                        Text(errorText!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.redAccent)),
-                        const SizedBox(height: 20),
+                        Text(
+                          errorText!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                        const SizedBox(height: 12),
                         ElevatedButton(
-                          onPressed: fetchRooms,
+                          onPressed: loadRooms,
                           child: const Text('إعادة المحاولة'),
                         ),
                       ],
@@ -166,9 +195,11 @@ class _RoomsTabState extends State<RoomsTab> {
                 )
               : rooms.isEmpty
                   ? const Center(
-                      child: Text('لا توجد غرف بعد\nاضغط + لإنشاء غرفة',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey)),
+                      child: Text(
+                        'لا توجد غرف\nاضغط إنشاء غرفة',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -177,18 +208,16 @@ class _RoomsTabState extends State<RoomsTab> {
                         final room = rooms[index];
                         return Card(
                           color: const Color(0xFF1E1E1E),
-                          margin: const EdgeInsets.only(bottom: 12),
                           child: ListTile(
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.deepPurple,
-                              child: Icon(Icons.mic, color: Colors.white),
+                            leading: const Icon(Icons.mic, color: Colors.greenAccent),
+                            title: Text(
+                              '${room['title'] ?? 'غرفة'}',
+                              style: const TextStyle(color: Colors.white),
                             ),
-                            title: Text(room['title'] ?? 'غرفة',
-                                style: const TextStyle(color: Colors.white)),
-                            subtitle: Text('غرفة رقم ${room['id']}',
-                                style: const TextStyle(color: Colors.grey)),
-                            trailing: const Icon(Icons.arrow_forward_ios,
-                                size: 14, color: Colors.grey),
+                            subtitle: Text(
+                              'ID: ${room['id']}',
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                             onTap: () async {
                               await Navigator.push(
                                 context,
@@ -199,7 +228,7 @@ class _RoomsTabState extends State<RoomsTab> {
                                   ),
                                 ),
                               );
-                              fetchRooms();
+                              loadRooms();
                             },
                           ),
                         );
@@ -208,12 +237,3 @@ class _RoomsTabState extends State<RoomsTab> {
     );
   }
 }
-
-// ========== 2) تبويب الأقسام ==========
-class CategoriesTab extends StatelessWidget {
-  const CategoriesTab({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final categories = [
-      {'name': 'دردشة', 'icon': Icons.chat, 'color': 
