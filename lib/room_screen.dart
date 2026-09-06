@@ -3,7 +3,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RoomScreen extends StatefulWidget {
   final int roomId;
-  const RoomScreen({super.key, required this.roomId});
+  final String userName;
+
+  const RoomScreen({
+    super.key,
+    required this.roomId,
+    required this.userName,
+  });
 
   @override
   State<RoomScreen> createState() => _RoomScreenState();
@@ -17,7 +23,6 @@ class _RoomScreenState extends State<RoomScreen> {
 
   final String myUserId =
       'user_${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
-  final String myUserName = 'عضو لمعة';
 
   @override
   void initState() {
@@ -72,13 +77,12 @@ class _RoomScreenState extends State<RoomScreen> {
 
     // صعود على مقعد فارغ
     if (seat['user_id'] == null) {
-      // تأكد أني مو جالس على مقعد ثاني
       final alreadySeated = seats.any((s) => s['user_id'] == myUserId);
       if (alreadySeated) return;
 
       await supabase.from('room_seats').update({
         'user_id': myUserId,
-        'user_name': myUserName,
+        'user_name': widget.userName, // اسمك من شاشة الدخول
       }).match({
         'room_id': widget.roomId,
         'seat_index': index,
@@ -86,7 +90,7 @@ class _RoomScreenState extends State<RoomScreen> {
       return;
     }
 
-    // نزول من مقعدي
+    // نزول من مقعدك
     if (seat['user_id'] == myUserId) {
       await supabase.from('room_seats').update({
         'user_id': null,
@@ -166,9 +170,12 @@ class _RoomScreenState extends State<RoomScreen> {
                         },
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Text('اضغط مقعد فارغ للصعود، واضغط مقعدك للنزول'),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'مرحبًا ${widget.userName} 👋\nاضغط مقعد فارغ للصعود، واضغط مقعدك للنزول',
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ],
                 ),
