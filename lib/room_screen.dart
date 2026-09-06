@@ -14,7 +14,6 @@ class RoomScreen extends StatefulWidget {
 class _RoomScreenState extends State<RoomScreen> {
   final supabase = Supabase.instance.client;
   
-  // ⚠️ ضع هنا الـ App ID الذي حصلت عليه من Agora
   final String agoraAppId = "888cd4788b404773bb0af444d26a5d4b";
 
   late RtcEngine _engine;
