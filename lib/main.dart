@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// يقرر: هل المستخدم مسجل دخول أم لا
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -43,7 +42,10 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         final session = Supabase.instance.client.auth.currentSession;
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        // أثناء أول تحميل
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            session == null &&
+            !snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
