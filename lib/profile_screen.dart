@@ -50,8 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'username': widget.userName,
           'display_name': widget.userName,
           'coins': 1000,
+          'diamonds': 0,
           'level': 1,
+          'xp': 0,
           'vip_level': 0,
+          'followers_count': 0,
+          'following_count': 0,
         }).select().single();
 
         setState(() {
@@ -76,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await supabase.auth.signOut();
       if (!mounted) return;
-
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
@@ -108,10 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
             child: const Text('حفظ'),
@@ -134,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await loadProfile();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث الاسم')),
+        const SnackBar(content: Text('تم تحديث الاسم ✅')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -142,6 +142,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SnackBar(content: Text('فشل التحديث: $e')),
       );
     }
+  }
+
+  void comingSoon(String title) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$title قريبًا ضمن الأساس التالي')),
+    );
   }
 
   @override
@@ -162,16 +168,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  errorText!,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.redAccent),
-                ),
+                Text(errorText!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.redAccent)),
                 const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: loadProfile,
-                  child: const Text('إعادة المحاولة'),
-                ),
+                ElevatedButton(onPressed: loadProfile, child: const Text('إعادة المحاولة')),
               ],
             ),
           ),
@@ -196,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ===== Header =====
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -210,10 +210,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Colors.white24,
-                      child: Icon(Icons.person, size: 40, color: Colors.white),
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(colors: [Colors.white, Colors.amber]),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 34,
+                        backgroundColor: Color(0xFF2A1A4A),
+                        child: Icon(Icons.person, size: 40, color: Colors.white),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -225,12 +232,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Flexible(
                                 child: Text(
                                   name,
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -252,10 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 6),
-                          Text(
-                            'ID: $shortId',
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
+                          Text('ID: $shortId', style: const TextStyle(color: Colors.white70, fontSize: 12)),
                         ],
                       ),
                     ),
@@ -276,18 +280,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            'المستوى $level',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text('المستوى $level', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           const Spacer(),
-                          Text(
-                            '$xp XP',
-                            style: const TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
+                          Text('$xp XP', style: const TextStyle(color: Colors.white70, fontSize: 12)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -306,39 +301,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
+
           const SizedBox(height: 16),
+
+          // ===== Stats =====
           Row(
             children: [
-              Expanded(
-                child: _statCard(Icons.monetization_on, Colors.orange, 'الكوينز', '$coins'),
-              ),
+              Expanded(child: _statCard(Icons.monetization_on, Colors.orange, 'الكوينز', '$coins')),
               const SizedBox(width: 10),
-              Expanded(
-                child: _statCard(Icons.diamond, Colors.cyan, 'الألماس', '$diamonds'),
-              ),
+              Expanded(child: _statCard(Icons.diamond, Colors.cyan, 'الألماس', '$diamonds')),
             ],
           ),
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(
-                child: _statCard(Icons.people, Colors.blueAccent, 'المتابعون', '$followers'),
-              ),
+              Expanded(child: _statCard(Icons.people, Colors.blueAccent, 'المتابعون', '$followers')),
               const SizedBox(width: 10),
-              Expanded(
-                child: _statCard(Icons.person_add_alt_1, Colors.purpleAccent, 'أتابع', '$following'),
-              ),
+              Expanded(child: _statCard(Icons.person_add_alt_1, Colors.purpleAccent, 'أتابع', '$following')),
             ],
           ),
+
           const SizedBox(height: 18),
-          const Text(
-            'الإعدادات',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+
+          // ===== Badges =====
+          const Text('🏅 الشارات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
+          SizedBox(
+            height: 86,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: const [
+                _Badge(icon: '🥇', name: 'ذهبية'),
+                _Badge(icon: '💎', name: 'ألماس'),
+                _Badge(icon: '👑', name: 'ملك'),
+                _Badge(icon: '🔥', name: 'نار'),
+                _Badge(icon: '⭐', name: 'نجم'),
+                _Badge(icon: '🚀', name: 'صاروخ'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ===== VIP Card =====
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: const LinearGradient(colors: [Color(0xFF667EEA), Color(0xFF764BA2)]),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.workspace_premium, color: Colors.amber, size: 40),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('العضوية VIP', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text('مميزات حصرية وإطار ذهبي', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => comingSoon('نظام VIP'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  child: const Text('ترقية', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 18),
+          const Text('الإعدادات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+
           _menuTile(Icons.edit, 'تعديل الاسم', editName),
+          _menuTile(Icons.account_balance_wallet, 'المحفظة والشحن', () => comingSoon('المحفظة')),
+          _menuTile(Icons.card_giftcard, 'هداياي', () => comingSoon('هداياي')),
+          _menuTile(Icons.history, 'سجل الغرف', () => comingSoon('سجل الغرف')),
+          _menuTile(Icons.leaderboard, 'قائمة المتصدرين', () => comingSoon('المتصدرين')),
+          _menuTile(Icons.security, 'الأمان والخصوصية', () => comingSoon('الأمان')),
+          _menuTile(Icons.settings, 'الإعدادات', () => comingSoon('الإعدادات')),
+          _menuTile(Icons.help_outline, 'المساعدة والدعم', () => comingSoon('المساعدة')),
+          _menuTile(Icons.info_outline, 'عن التطبيق', () => comingSoon('عن التطبيق')),
           _menuTile(Icons.refresh, 'تحديث البيانات', loadProfile),
           _menuTile(Icons.logout, 'تسجيل الخروج', logout, danger: true),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -353,7 +403,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 20),
+          ),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,12 +430,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: ListTile(
         leading: Icon(icon, color: danger ? Colors.redAccent : Colors.white70),
-        title: Text(
-          title,
-          style: TextStyle(color: danger ? Colors.redAccent : Colors.white),
-        ),
+        title: Text(title, style: TextStyle(color: danger ? Colors.redAccent : Colors.white)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
         onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  final String icon;
+  final String name;
+  const _Badge({required this.icon, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 74,
+      margin: const EdgeInsets.only(right: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A24),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFF2A2A35)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 26)),
+          const SizedBox(height: 4),
+          Text(name, style: const TextStyle(fontSize: 11)),
+        ],
       ),
     );
   }
