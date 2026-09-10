@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lottie/lottie.dart';
@@ -33,12 +34,14 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
 
   late final String myUserId;
 
-  // 🌟 محرك Lottie الأصلي الكامل للشاشة (Full-Screen Transparent Lottie Overlay)
-  String? activeLottieUrl;
+  // 🌟 محرك أنيميشن الهدايا الخارق المزدوج (GPU Shockwave + Lottie Overlay)
+  String? activeGiftEmoji;
   String? activeGiftName;
   String? activeGiftSender;
-  
-  late final AnimationController _lottieController;
+  String? activeLottieUrl;
+  Color activeThemeColor = Colors.amber;
+
+  late final AnimationController _effectsController;
 
   @override
   void initState() {
@@ -46,16 +49,21 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
     final authId = supabase.auth.currentUser?.id;
     myUserId = authId ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
 
-    // إعداد محرك Lottie
-    _lottieController = AnimationController(vsync: this);
-    _lottieController.addStatusListener((status) {
+    // إعداد محرك المؤثرات البصرية (3.5 ثانية لكل هدية)
+    _effectsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3500),
+    );
+
+    _effectsController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          activeLottieUrl = null;
+          activeGiftEmoji = null;
           activeGiftName = null;
           activeGiftSender = null;
+          activeLottieUrl = null;
         });
-        _lottieController.reset();
+        _effectsController.reset();
       }
     });
 
@@ -153,26 +161,37 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
     });
   }
 
-  // 👑 تشغيل أنيميشن Lottie على كامل الشاشة
-  void playLottieOverlay(String lottieUrl, String giftName) {
+  // تشغيل المحرك المرئي الخارق
+  void playFullAnimation(String emoji, String name, String? lottieUrl, Color color) {
     setState(() {
-      activeLottieUrl = lottieUrl;
-      activeGiftName = giftName;
+      activeGiftEmoji = emoji;
+      activeGiftName = name;
       activeGiftSender = widget.userName;
+      activeLottieUrl = lottieUrl;
+      activeThemeColor = color;
     });
+
+    _effectsController.reset();
+    _effectsController.forward();
   }
 
   void sendGift(Map<String, dynamic> gift) {
     final emoji = gift['emoji'] ?? '🎁';
     final name = gift['name'] ?? 'هدية';
     final price = gift['price'] ?? 10;
-    final lottieUrl = gift['lottie_url'] ?? 'https://lottie.host/3e7264a7-8f5c-4d32-bb94-0cfb4db0c1c4/t6XQ6sFfP9.json';
+    final cat = gift['category'] ?? 'عادية';
+    final lottieUrl = gift['lottie_url'] as String?;
+
+    Color themeColor = Colors.amber;
+    if (cat == 'VIP تيكتوك') themeColor = Colors.purpleAccent;
+    if (name.toString().contains('الأسد') || name.toString().contains('فيراري')) themeColor = Colors.orangeAccent;
+    if (name.toString().contains('الحوت')) themeColor = Colors.cyanAccent;
 
     setState(() {
       chat.insert(0, '👑 ${widget.userName} أرسل $emoji $name ($price 💰)');
     });
 
-    playLottieOverlay(lottieUrl, name);
+    playFullAnimation(emoji, name, lottieUrl, themeColor);
   }
 
   void openGiftsStore() {
@@ -219,7 +238,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 12),
 
-                    // البحث
                     TextField(
                       onChanged: (v) => setModalState(() => searchQuery = v),
                       style: const TextStyle(color: Colors.white),
@@ -235,7 +253,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 12),
 
-                    // التبويبات
                     SizedBox(
                       height: 38,
                       child: ListView.separated(
@@ -261,7 +278,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 12),
 
-                    // شبكة الهدايا
                     Expanded(
                       child: filtered.isEmpty
                           ? const Center(child: Text('لا توجد هدايا تطابق البحث', style: TextStyle(color: Colors.white54)))
@@ -351,7 +367,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     chatController.dispose();
-    _lottieController.dispose();
+    _effectsController.dispose();
     super.dispose();
   }
 
@@ -367,11 +383,10 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
               ? Center(child: Text(errorText!, style: const TextStyle(color: Colors.redAccent)))
               : Stack(
                   children: [
-                    // 1️⃣ واجهة الغرفة المباشرة (الشات، المقاعد، الهيدر)
+                    // 1️⃣ واجهة الغرفة المباشرة الكاملة
                     SafeArea(
                       child: Column(
                         children: [
-                          // الهيدر العلوي
                           Padding(
                             padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
                             child: Row(
@@ -402,7 +417,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                          // شاشة البث
                           Container(
                             margin: const EdgeInsets.symmetric(horizontal: 12),
                             height: 180,
@@ -431,7 +445,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
 
                           const SizedBox(height: 12),
 
-                          // شبكة المقاعد
                           SizedBox(
                             height: 110,
                             child: ListView.separated(
@@ -474,7 +487,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                          // صندوق الشات
                           Expanded(
                             child: Container(
                               margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -498,7 +510,6 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                          // شريط الأدوات السفلي
                           Padding(
                             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
                             child: Row(
@@ -538,62 +549,117 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                       ),
                     ),
 
-                    // 2️⃣ الطبقة العليا الفائقة (Full-Screen Lottie Overlay Engine)
-                    // تعادل تماماً (pointer-events: none + z-index)
-                    if (activeLottieUrl != null)
+                    // 2️⃣ محرك الأنيميشن الهجين الخارق (GPU Native Blast + Lottie Support)
+                    if (activeGiftEmoji != null)
                       IgnorePointer(
-                        child: Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          color: Colors.black.withOpacity(0.4), // تعتيم خفيف للشاشة لإبراز أنيميشن الـ 3D
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // أنيميشن Lottie عالي الدقة يغطي الشاشة
-                              Lottie.network(
-                                activeLottieUrl!,
-                                controller: _lottieController,
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.contain, // احتواء متناسق لكل الشاشات
-                                onLoaded: (composition) {
-                                  _lottieController
-                                    ..duration = composition.duration
-                                    ..forward();
-                                },
-                              ),
+                        child: AnimatedBuilder(
+                          animation: _effectsController,
+                          builder: (context, _) {
+                            final progress = _effectsController.value;
+                            final opacity = (progress < 0.15)
+                                ? (progress / 0.15)
+                                : (progress > 0.85 ? (1.0 - progress) / 0.15 : 1.0);
+                            final scale = 0.2 + (sin(progress * pi) * 0.95);
 
-                              // شريط اسم الراسل مع الهدية بأسفل الشاشة
-                              Positioned(
-                                bottom: 150,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(colors: [Colors.amber, Colors.orangeAccent]),
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: const [
-                                      BoxShadow(color: Colors.black54, blurRadius: 15, spreadRadius: 2)
-                                    ],
+                            return Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.black.withOpacity(0.65 * opacity.clamp(0.0, 1.0)),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // رسم انفجار الجسيمات الكونية المضيئة بـ GPU
+                                  CustomPaint(
+                                    size: Size.infinite,
+                                    painter: CosmicParticlePainter(progress: progress, color: activeThemeColor),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.workspace_premium, color: Colors.black),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '$activeGiftSender أرسل $activeGiftName',
-                                        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
+
+                                  // Lottie إذا توفر النت + الهالة النورانية الضخمة الحاضرة دائماً
+                                  Opacity(
+                                    opacity: opacity.clamp(0.0, 1.0),
+                                    child: Transform.scale(
+                                      scale: scale,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(30),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: activeThemeColor.withOpacity(0.9),
+                                                  blurRadius: 110,
+                                                  spreadRadius: 45,
+                                                )
+                                              ],
+                                            ),
+                                            child: activeLottieUrl != null
+                                                ? SizedBox(
+                                                    width: 250,
+                                                    height: 250,
+                                                    child: Lottie.network(
+                                                      activeLottieUrl!,
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder: (_, __, ___) => Text(activeGiftEmoji!, style: const TextStyle(fontSize: 120)),
+                                                    ),
+                                                  )
+                                                : Text(activeGiftEmoji!, style: const TextStyle(fontSize: 120)),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(colors: [activeThemeColor, Colors.orangeAccent]),
+                                              borderRadius: BorderRadius.circular(30),
+                                              boxShadow: const [BoxShadow(color: Colors.black87, blurRadius: 15)],
+                                            ),
+                                            child: Text(
+                                              '🎉 $activeGiftSender أرسل $activeGiftName 🎉',
+                                              style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ),
                   ],
                 ),
     );
   }
+}
+
+// رسم انبعاث الجسيمات الكونية والشرارات المضيئة بسرعة 60 FPS
+class CosmicParticlePainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final Random random = Random(123);
+
+  CosmicParticlePainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 75; i++) {
+      final angle = (i * (2 * pi / 75)) + (progress * 2 * pi);
+      final distance = (progress * (size.width * 0.7)) * (0.4 + (random.nextDouble() * 0.6));
+      final x = center.dx + cos(angle) * distance;
+      final y = center.dy + sin(angle) * distance;
+      final radius = (1.0 - progress) * (5.0 + (random.nextDouble() * 10.0));
+
+      paint.color = (i % 2 == 0 ? color : Colors.white).withOpacity((1.0 - progress).clamp(0.0, 1.0));
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CosmicParticlePainter oldDelegate) => true;
 }
