@@ -1,6 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:lottie/lottie.dart';
 
 class RoomScreen extends StatefulWidget {
   final int roomId;
@@ -33,20 +33,13 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
 
   late final String myUserId;
 
-  // 🌟 محرك أنيميشن الهدايا 3D المليء للشاشة
-  String? currentGiftAnimationUrl;
-  String? currentGiftSender;
-  String? currentGiftName;
-  late final AnimationController _overlayGiftController;
-
-  // مكتبة أنيميشن الهدايا الفخمة الأسطورية (3D Lottie Animations)
-  final Map<String, String> premiumAnimations = {
-    'الكون العظيم Universe 🌌': 'https://lottie.host/81b2382c-b570-4927-aa87-32115dc5fb1b/zH9tV8ZfV6.json',
-    'الحوت الأزرق 🐋': 'https://lottie.host/791c6e14-e51b-4171-be84-b0a7dd650228/qU3wO2W8O7.json',
-    'الأسد الذهبي 🦁': 'https://lottie.host/7e02e1de-baaf-4384-ad4b-bc54a72d73be/R4VlUoM9U2.json',
-    'التنين الإمبراطوري 🐉': 'https://lottie.host/2df8f98d-697a-4c2f-b4c4-78338f0d8a57/PZQeH8i9X1.json',
-    'الفيراري السريعة 🏎️': 'https://lottie.host/81b2382c-b570-4927-aa87-32115dc5fb1b/zH9tV8ZfV6.json',
-  };
+  // 🌟 محرك أنيميشن الهدايا الأصلي المدمج (Native Particle & Glow Engine)
+  String? activeGiftEmoji;
+  String? activeGiftName;
+  String? activeGiftSender;
+  Color activeGiftColor = Colors.amber;
+  
+  late final AnimationController _animController;
 
   @override
   void initState() {
@@ -54,16 +47,20 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
     final authId = supabase.auth.currentUser?.id;
     myUserId = authId ?? 'guest_${DateTime.now().millisecondsSinceEpoch}';
 
-    // إعداد محرك تشغيل أنيميشن الهدايا
-    _overlayGiftController = AnimationController(vsync: this);
-    _overlayGiftController.addStatusListener((status) {
+    // إعداد محرك الأنيميشن المحلي (3 ثوانٍ للهدية)
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    );
+
+    _animController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          currentGiftAnimationUrl = null;
-          currentGiftSender = null;
-          currentGiftName = null;
+          activeGiftEmoji = null;
+          activeGiftName = null;
+          activeGiftSender = null;
         });
-        _overlayGiftController.reset();
+        _animController.reset();
       }
     });
 
@@ -161,28 +158,34 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
     });
   }
 
-  void triggerGiftAnimation(String giftName) {
-    String animUrl = premiumAnimations[giftName] ??
-        'https://lottie.host/3e7264a7-8f5c-4d32-bb94-0cfb4db0c1c4/t6XQ6sFfP9.json';
-
+  // تشغيل أنيميشن الهدية الأصلي الفخم
+  void playNativeGiftAnimation(String emoji, String name, Color themeColor) {
     setState(() {
-      currentGiftAnimationUrl = animUrl;
-      currentGiftSender = widget.userName;
-      currentGiftName = giftName;
+      activeGiftEmoji = emoji;
+      activeGiftName = name;
+      activeGiftSender = widget.userName;
+      activeGiftColor = themeColor;
     });
+    _animController.reset();
+    _animController.forward();
   }
 
   void sendGift(Map<String, dynamic> gift) {
     final emoji = gift['emoji'] ?? '🎁';
     final name = gift['name'] ?? 'هدية';
     final price = gift['price'] ?? 10;
+    final cat = gift['category'] ?? 'عادية';
+
+    Color themeColor = Colors.amber;
+    if (cat == 'VIP تيكتوك') themeColor = Colors.purpleAccent;
+    if (name.toString().contains('الأسد') || name.toString().contains('فيراري')) themeColor = Colors.orangeAccent;
+    if (name.toString().contains('الحوت')) themeColor = Colors.cyanAccent;
 
     setState(() {
       chat.insert(0, '👑 ${widget.userName} أرسل $emoji $name ($price 💰)');
     });
 
-    triggerGiftAnimation(name);
-    _toast('تم إرسال $name 🎁');
+    playNativeGiftAnimation(emoji, name, themeColor);
   }
 
   void openGiftsStore() {
@@ -234,7 +237,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                       onChanged: (v) => setModalState(() => searchQuery = v),
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'ابحث عن هدية (أسد، حوت، فيراري...)...',
+                        hintText: 'ابحث عن هدية (أسد، حوت، كون...)...',
                         hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
                         prefixIcon: const Icon(Icons.search, color: Colors.amber),
                         filled: true,
@@ -361,7 +364,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     chatController.dispose();
-    _overlayGiftController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -377,7 +380,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
               ? Center(child: Text(errorText!, style: const TextStyle(color: Colors.redAccent)))
               : Stack(
                   children: [
-                    // 1️⃣ الطبقة الأساسية: واجهة الغرفة الكاملة
+                    // 1️⃣ الطبقة الأساسية: واجهة الغرفة كاملة
                     SafeArea(
                       child: Column(
                         children: [
@@ -412,7 +415,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                          // شاشة الفيديو / الصوت
+                          // شاشة البث
                           Container(
                             margin: const EdgeInsets.symmetric(horizontal: 12),
                             height: 180,
@@ -484,7 +487,7 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                             ),
                           ),
 
-                          // صندوق الشات الحقيقي
+                          // صندوق الشات
                           Expanded(
                             child: Container(
                               margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -548,49 +551,136 @@ class _RoomScreenState extends State<RoomScreen> with TickerProviderStateMixin {
                       ),
                     ),
 
-                    // 2️⃣ الطبقة الثانية: محرك أنيميشن الهدايا 3D (Full-screen Overlay)
-                    if (currentGiftAnimationUrl != null)
+                    // 2️⃣ الطبقة الثانية: محرك أنيميشن الجسيمات والكون الأصلي المدمج (Native Fullscreen Particles)
+                    if (activeGiftEmoji != null)
                       IgnorePointer(
-                        child: Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          color: Colors.black.withOpacity(0.35),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Lottie.network(
-                                currentGiftAnimationUrl!,
-                                controller: _overlayGiftController,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                                onLoaded: (composition) {
-                                  _overlayGiftController
-                                    ..duration = composition.duration
-                                    ..forward();
-                                },
-                              ),
-                              Positioned(
-                                bottom: 180,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(colors: [Colors.amber, Colors.orangeAccent]),
-                                    borderRadius: BorderRadius.circular(30),
-                                    boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 12)],
-                                  ),
-                                  child: Text(
-                                    '🎉 $currentGiftSender أرسل $currentGiftName 🎉',
-                                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        child: NativeGiftOverlay(
+                          emoji: activeGiftEmoji!,
+                          name: activeGiftName!,
+                          sender: activeGiftSender!,
+                          themeColor: activeGiftColor,
+                          controller: _animController,
                         ),
                       ),
                   ],
                 ),
     );
   }
+}
+
+// 🌟 الودجت البرمجي المستقل لأنيميشن الجسيمات والأنوار والكون 3D
+class NativeGiftOverlay extends StatelessWidget {
+  final String emoji;
+  final String name;
+  final String sender;
+  final Color themeColor;
+  final AnimationController controller;
+
+  const NativeGiftOverlay({
+    super.key,
+    required this.emoji,
+    required this.name,
+    required this.sender,
+    required this.themeColor,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final progress = controller.value;
+        final opacity = (progress < 0.2)
+            ? (progress / 0.2)
+            : (progress > 0.8 ? (1.0 - progress) / 0.2 : 1.0);
+        final scale = 0.3 + (sin(progress * pi) * 0.9);
+
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.black.withOpacity(0.55 * opacity.clamp(0.0, 1.0)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // رسم انبعاث الجسيمات المضيئة والنجوم المتلألئة
+              CustomPaint(
+                size: Size.infinite,
+                painter: ParticlePainter(progress: progress, color: themeColor),
+              ),
+
+              // الهالة النورانية والهدية المكبرة بالمنتصف
+              Opacity(
+                opacity: opacity.clamp(0.0, 1.0),
+                child: Transform.scale(
+                  scale: scale,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(35),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: themeColor.withOpacity(0.9),
+                              blurRadius: 100,
+                              spreadRadius: 40,
+                            ),
+                          ],
+                        ),
+                        child: Text(emoji, style: const TextStyle(fontSize: 130)),
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [themeColor, Colors.orangeAccent]),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: const [BoxShadow(color: Colors.black87, blurRadius: 15)],
+                        ),
+                        child: Text(
+                          '🎉 $sender أرسل $name 🎉',
+                          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// رسم الجسيمات والشرارات بالفلاتر Canvas
+class ParticlePainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final Random random = Random(42);
+
+  ParticlePainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    for (int i = 0; i < 60; i++) {
+      final angle = (i * (2 * pi / 60)) + (progress * pi);
+      final distance = (progress * (size.width * 0.6)) * (0.5 + (random.nextDouble() * 0.5));
+      final x = center.dx + cos(angle) * distance;
+      final y = center.dy + sin(angle) * distance;
+      final radius = (1.0 - progress) * (6.0 + (random.nextDouble() * 8.0));
+
+      paint.color = (i % 2 == 0 ? color : Colors.white).withOpacity((1.0 - progress).clamp(0.0, 1.0));
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant ParticlePainter oldDelegate) => true;
 }
